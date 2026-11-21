@@ -1,29 +1,22 @@
 const express = require("express");
-const { AdminAuth, userAuth } = require("./middlewares/auth");
 
 const app = express();
 
-app.use("/admin", AdminAuth);
-
-app.get("/user/login", (req, res) => {
-  res.send("User login endpoint accessed successfully");
+//Route level error handling
+app.get("/user", (req, res, next) => {
+  try {
+    throw new Error("Simulated error in /user route");
+  } catch (error) {
+    console.error("Error in /user route:", error);
+    res.status(500).send("Something went wrong in /user route");
+    //next(error); // Pass the error to the global error handler
+  }
 });
 
-app.get("/user", userAuth, (req, res) => {
-  res.send("User endpoint accessed successfully");
-});
-
-app.get("/admin/getAllUser", (req, res) => {
-  res.send("All users retrieved successfully");
-});
-
-app.get("/admin/deleteUser/:id", (req, res) => {
-  const userId = req.params.id;
-  res.send(`User with ID ${userId} deleted successfully`);
-});
-
-app.post("/admin/createUser", (req, res) => {
-  res.send("User created successfully");
+//optional handler & always use global error handling middleware at the end of all routes
+app.use("/", (err, req, res, next) => {
+  console.error("Global error handler:", err);
+  res.status(500).send("Something went wrong");
 });
 
 app.listen(3000, () => {
