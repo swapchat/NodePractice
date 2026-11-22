@@ -15,7 +15,7 @@ const connectDB = async () => {
   const password = encodeURIComponent(MONGODB_PASSWORD);
 
   await mongoose.connect(
-    `mongodb+srv://${username}:${password}@${MONGODB_CLUSTER}/`,
+    `mongodb+srv://${username}:${password}@${MONGODB_CLUSTER}/DevTinder`,
   );
 };
 
