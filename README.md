@@ -3,8 +3,7 @@
 This project is part of my learning journey with **Namaste Node.js by Akshay
 Saini**.
 
-DevTinder is a small Node.js learning project. It currently starts an Express
-server and connects to MongoDB with Mongoose. The project will grow as I learn
+DevTinder is a small Node.js learning project. The project will grow as I learn
 Node.js and add features over time.
 
 ## Requirements
