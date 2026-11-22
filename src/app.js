@@ -43,6 +43,7 @@ app.get("/users", async (req, res) => {
 
 app.patch("/user/:id", validateUserId, async (req, res) => {
   const allowedFields = ["firstName", "lastName", "age", "gender"];
+
   if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
     return res.status(400).json({ error: "Invalid update body" });
   }
@@ -59,7 +60,7 @@ app.patch("/user/:id", validateUserId, async (req, res) => {
 
   try {
     const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+      returnDocument: "after",
       runValidators: true,
     });
     if (!updatedUser) {
