@@ -7,16 +7,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.post("/signup", async (req, res) => {
-  const userObj = {
-    firstName: req.body.firstName,
-    lastName: req.body.lastName,
-    email: req.body.email,
-    password: req.body.password,
-    age: req.body.age,
-    gender: req.body.gender,
-  };
-
-  const user = new User(userObj);
+  const user = new User(req.body);
   try {
     const savedUser = await user.save();
     console.log("Saved user:", savedUser);
