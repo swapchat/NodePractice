@@ -46,14 +46,14 @@ app.get("/users", async (req, res) => {
 });
 
 app.patch("/user/:id", validateUserId, async (req, res) => {
-  const allowedFields = ["firstName", "lastName", "age", "gender"];
+  const allowedFields = ["password", "age", "gender"];
 
   if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
     return res.status(400).json({ error: "Invalid update body" });
   }
   if (Object.keys(req.body).some((field) => !allowedFields.includes(field))) {
     return res.status(400).json({
-      error: "Only firstName, lastName, age, and gender can be updated",
+      error: "Only password, age, and gender can be updated",
     });
   }
   if (Object.keys(req.body).length === 0) {
@@ -63,7 +63,7 @@ app.patch("/user/:id", validateUserId, async (req, res) => {
   }
 
   try {
-    const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, {
+    const updatedUser = await User.findByIdAndUpdate(req.params?.id, req.body, {
       returnDocument: "after",
       runValidators: true,
     });
