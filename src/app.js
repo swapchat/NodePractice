@@ -24,8 +24,12 @@ app.post("/signup", async (req, res) => {
     if (error.code === 11000) {
       return res.status(409).json({ error: "Email already exists" });
     }
-    if (error.name === "ValidationError" || error.name === "CastError") {
-      return res.status(400).json({ error: "Invalid signup data" });
+    if (error.name === "ValidationError") {
+      const details = Object.values(error.errors).map(({ path, message }) => ({
+        field: path,
+        message,
+      }));
+      return res.status(400).json({ error: "Validation failed", details });
     }
     res.status(500).json({ error: "Failed to save user" });
   }
@@ -69,8 +73,12 @@ app.patch("/user/:id", validateUserId, async (req, res) => {
     res.status(200).json(updatedUser);
   } catch (error) {
     console.error("Error updating user:", error);
-    if (error.name === "ValidationError" || error.name === "CastError") {
-      return res.status(400).json({ error: "Invalid update data" });
+    if (error.name === "ValidationError") {
+      const details = Object.values(error.errors).map(({ path, message }) => ({
+        field: path,
+        message,
+      }));
+      return res.status(400).json({ error: "Validation failed", details });
     }
     res.status(500).json({ error: "Failed to update user" });
   }
