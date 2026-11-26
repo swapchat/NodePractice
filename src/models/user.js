@@ -42,8 +42,8 @@ const userSchema = new Schema(
             minNumbers: 1,
             minSymbols: 1,
           }),
-        message: (props) =>
-          `${props.value} is not a strong password! It should be at least 8 characters long and include uppercase, lowercase, number, and symbol.`,
+        message:
+          "Password must be at least 8 characters long and include uppercase, lowercase, number, and symbol.",
       },
     },
     age: {
