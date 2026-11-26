@@ -1,5 +1,7 @@
 const express = require("express");
 const connectDB = require("./config/database");
+const bcrypt = require("bcrypt");
+const validator = require("validator");
 const User = require("./models/user");
 const {
   meetsPasswordStrengthRequirements,
@@ -7,9 +9,8 @@ const {
 } = require("./utils/validation");
 const { toPublicUser, toPublicUserList } = require("./utils/userSerializer");
 const validateUserId = require("./middlewares/validateUserId");
+
 const app = express();
-const bcrypt = require("bcrypt");
-const validator = require("validator");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
