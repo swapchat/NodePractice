@@ -42,6 +42,5 @@ const validateSignupInput = (body) => {
 };
 
 module.exports = {
-  meetsPasswordStrengthRequirements,
   validateSignupInput,
 };
