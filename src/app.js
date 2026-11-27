@@ -1,19 +1,25 @@
 const express = require("express");
-const connectDB = require("./config/database");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const validator = require("validator");
+const connectDB = require("./config/database");
 const User = require("./models/user");
-const {
-  meetsPasswordStrengthRequirements,
-  validateSignupInput,
-} = require("./utils/validation");
-const { toPublicUser, toPublicUserList } = require("./utils/userSerializer");
-const validateUserId = require("./middlewares/validateUserId");
+const { validateSignupInput } = require("./utils/validation");
+const { toPublicUser } = require("./utils/userSerializer");
+const { userAuth } = require("./middlewares/auth");
+require("dotenv").config();
+
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error("Missing JWT_SECRET in .env");
+}
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 app.post("/signup", async (req, res) => {
   const validationErrors = validateSignupInput(req.body);
@@ -93,6 +99,17 @@ app.post("/login", async (req, res) => {
     if (!isPasswordValid) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
+
+    const token = jwt.sign({ _id: user._id, email: user.email }, JWT_SECRET, {
+      expiresIn: "1d",
+    });
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    });
+
     res.status(200).json({ message: "Login successful" });
   } catch (error) {
     console.error("Error during login:", error);
@@ -100,95 +117,15 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.get("/users", async (req, res) => {
-  try {
-    const users = await User.find().select("firstName lastName age gender");
-    res.status(200).json(toPublicUserList(users));
-  } catch (error) {
-    console.error("Error fetching users:", error);
-    res.status(500).json({ error: "Failed to fetch users" });
-  }
+app.get("/profile", userAuth, (req, res) => {
+  res.status(200).json(toPublicUser(req.user));
 });
 
-app.patch("/user/:id", validateUserId, async (req, res) => {
-  const allowedFields = ["password", "age", "gender"];
-
-  if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
-    return res.status(400).json({ error: "Invalid update body" });
-  }
-  if (Object.keys(req.body).length === 0) {
-    return res
-      .status(400)
-      .json({ error: "Provide at least one field to update" });
-  }
-  if (Object.keys(req.body).some((field) => !allowedFields.includes(field))) {
-    return res.status(400).json({
-      error: "Only password, age, and gender can be updated",
-    });
-  }
-  if (
-    Object.prototype.hasOwnProperty.call(req.body, "password") &&
-    !meetsPasswordStrengthRequirements(req.body.password)
-  ) {
-    return res.status(400).json({
-      error: "Validation failed",
-      details: [
-        {
-          field: "password",
-          message:
-            "Password must be at least 8 characters and include uppercase, lowercase, number, and symbol characters.",
-        },
-      ],
-    });
-  }
-
-  try {
-    const userUpdates = {};
-    for (const field of allowedFields) {
-      if (Object.prototype.hasOwnProperty.call(req.body, field)) {
-        userUpdates[field] = req.body[field];
-      }
-    }
-    if (Object.prototype.hasOwnProperty.call(userUpdates, "password")) {
-      userUpdates.password = await bcrypt.hash(userUpdates.password, 10);
-    }
-
-    const updatedUser = await User.findByIdAndUpdate(
-      req.params.id,
-      userUpdates,
-      {
-        returnDocument: "after",
-        runValidators: true,
-      },
-    );
-    if (!updatedUser) {
-      return res.status(404).json({ error: "User not found" });
-    }
-    res.status(200).json(toPublicUser(updatedUser));
-  } catch (error) {
-    console.error("Error updating user:", error);
-    if (error.name === "ValidationError") {
-      const details = Object.values(error.errors).map(({ path, message }) => ({
-        field: path,
-        message,
-      }));
-      return res.status(400).json({ error: "Validation failed", details });
-    }
-    res.status(500).json({ error: "Failed to update user" });
-  }
-});
-
-app.delete("/user/:id", validateUserId, async (req, res) => {
-  try {
-    const deletedUser = await User.findByIdAndDelete(req.params.id);
-    if (!deletedUser) {
-      return res.status(404).json({ error: "User not found" });
-    }
-    res.status(200).json("User deleted successfully");
-  } catch (error) {
-    console.error("Error deleting user:", error);
-    res.status(500).json({ error: "Failed to delete user" });
-  }
+app.post("/sendConnectionRequest", userAuth, (req, res) => {
+  const { firstName } = req.user;
+  res
+    .status(200)
+    .json({ message: `${firstName} sent the connection request` });
 });
 
 connectDB()

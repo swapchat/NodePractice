@@ -6,9 +6,6 @@ const toPublicUser = (user) => ({
   gender: user.gender,
 });
 
-const toPublicUserList = (users) => users.map(toPublicUser);
-
 module.exports = {
   toPublicUser,
-  toPublicUserList,
 };
