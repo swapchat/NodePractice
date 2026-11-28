@@ -107,7 +107,6 @@ app.post("/login", async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
     });
 
     res.status(200).json({ message: "Login successful" });
@@ -123,9 +122,7 @@ app.get("/profile", userAuth, (req, res) => {
 
 app.post("/sendConnectionRequest", userAuth, (req, res) => {
   const { firstName } = req.user;
-  res
-    .status(200)
-    .json({ message: `${firstName} sent the connection request` });
+  res.status(200).json({ message: `${firstName} sent the connection request` });
 });
 
 connectDB()
