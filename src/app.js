@@ -1,7 +1,6 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const connectDB = require("./config/database");
-const { userAuth } = require("./middlewares/auth");
 
 const app = express();
 
