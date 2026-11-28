@@ -149,6 +149,7 @@ const validateUpdateInput = (body) => {
 };
 
 module.exports = {
+  meetsPasswordStrengthRequirements,
   validateSignupInput,
   validateUpdateInput,
 };
