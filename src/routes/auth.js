@@ -15,7 +15,17 @@ router.post("/signup", async (req, res) => {
   }
 
   try {
-    const { firstName, lastName, email, password, age, gender } = req.body;
+    const {
+      firstName,
+      lastName,
+      email,
+      password,
+      age,
+      gender,
+      about,
+      photoUrl,
+      skills,
+    } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({
       firstName,
@@ -24,6 +34,9 @@ router.post("/signup", async (req, res) => {
       password: hashedPassword,
       age,
       gender,
+      about,
+      photoUrl,
+      skills,
     });
     await user.save();
     return res.status(200).json({ message: "Signup request processed" });

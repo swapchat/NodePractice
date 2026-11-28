@@ -20,7 +20,7 @@ const userAuth = async (req, res, next) => {
     }
 
     const user = await User.findById(decoded._id).select(
-      "firstName lastName email age gender",
+      "firstName lastName email age gender about photoUrl skills",
     );
     if (!user) {
       return res.status(401).json({ error: "Unauthorized: User not found" });

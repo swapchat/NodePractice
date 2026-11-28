@@ -4,6 +4,9 @@ const toPublicUser = (user) => ({
   lastName: user.lastName,
   age: user.age,
   gender: user.gender,
+  about: user.about,
+  photoUrl: user.photoUrl,
+  skills: user.skills,
 });
 
 module.exports = {

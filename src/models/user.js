@@ -62,6 +62,41 @@ const userSchema = new Schema(
       enum: ["male", "female", "other"],
       lowercase: true,
     },
+    about: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+      default: "",
+    },
+    photoUrl: {
+      type: String,
+      trim: true,
+      default: "",
+      validate: {
+        validator: (value) =>
+          value === "" ||
+          validator.isURL(value, {
+            protocols: ["http", "https"],
+            require_protocol: true,
+          }),
+        message: "Photo URL must be a valid HTTP or HTTPS URL",
+      },
+    },
+    skills: {
+      type: [
+        {
+          type: String,
+          trim: true,
+          minlength: 1,
+          maxlength: 30,
+        },
+      ],
+      default: [],
+      validate: {
+        validator: (skills) => skills.length <= 5,
+        message: "A maximum of 5 skills is allowed",
+      },
+    },
   },
   { timestamps: true },
 );
