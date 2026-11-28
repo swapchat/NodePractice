@@ -1,6 +1,5 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
-const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const validator = require("validator");
 const connectDB = require("./config/database");
@@ -8,12 +7,6 @@ const User = require("./models/user");
 const { validateSignupInput } = require("./utils/validation");
 const { toPublicUser } = require("./utils/userSerializer");
 const { userAuth } = require("./middlewares/auth");
-require("dotenv").config();
-
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) {
-  throw new Error("Missing JWT_SECRET in .env");
-}
 
 const app = express();
 
@@ -95,14 +88,12 @@ app.post("/login", async (req, res) => {
     if (!user) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await user.validatePassword(password);
     if (!isPasswordValid) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
-    const token = jwt.sign({ _id: user._id, email: user.email }, JWT_SECRET, {
-      expiresIn: "7d",
-    });
+    const token = await user.getJWT();
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
